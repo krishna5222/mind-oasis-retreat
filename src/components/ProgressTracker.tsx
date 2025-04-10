@@ -1,181 +1,203 @@
 
-import React from 'react';
-import { LineChart, Calendar, Award, Clock } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { ChevronLeft, ChevronRight, Trophy, Award, CheckCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
-// Mock data for the chart
-const weeklyData = [
-  { name: 'Mon', minutes: 15 },
-  { name: 'Tue', minutes: 30 },
-  { name: 'Wed', minutes: 20 },
-  { name: 'Thu', minutes: 45 },
-  { name: 'Fri', minutes: 25 },
-  { name: 'Sat', minutes: 10 },
-  { name: 'Sun', minutes: 35 },
-];
+interface DetoxGoal {
+  day: number;
+  goal: string;
+  completed: boolean;
+}
 
-const CustomTooltip = ({ active, payload }: any) => {
-  if (active && payload && payload.length) {
-    return (
-      <div className="bg-white p-2 shadow rounded border border-mindcleanse-100">
-        <p className="text-sm text-mindcleanse-700">{`${payload[0].value} minutes`}</p>
-      </div>
-    );
-  }
-  return null;
-};
-
-const ProgressTracker: React.FC = () => {
-  // Mock data
-  const currentStreak = 3;
-  const totalDays = 21;
-  const daysCompleted = 12;
-  const achievements = [
-    { name: '3-Day Streak', completed: true },
-    { name: '1 Week Completed', completed: true },
-    { name: '10 Journal Entries', completed: false },
-    { name: '2 Weeks Completed', completed: false },
-    { name: '30 Mindful Minutes', completed: true },
-  ];
+const ProgressTracker = () => {
+  const [detoxDay, setDetoxDay] = useState(0);
+  const [completionRate, setCompletionRate] = useState(0);
+  const [dailyGoals, setDailyGoals] = useState<DetoxGoal[]>([]);
   
-  const percentComplete = (daysCompleted / totalDays) * 100;
+  // Check if onboarding is completed and get detox info
+  useEffect(() => {
+    const onboardingData = localStorage.getItem('mindCleanseOnboarding');
+    if (onboardingData) {
+      const parsedData = JSON.parse(onboardingData);
+      if (parsedData.startDate) {
+        const startDate = new Date(parsedData.startDate);
+        const currentDate = new Date();
+        const timeDiff = currentDate.getTime() - startDate.getTime();
+        const dayDiff = Math.floor(timeDiff / (1000 * 3600 * 24)) + 1;
+        
+        // Set current detox day
+        setDetoxDay(dayDiff);
+        
+        // Calculate completion rate
+        let totalDays = 7; // Default to 7 days
+        if (parsedData.detoxDuration) {
+          totalDays = parsedData.detoxDuration === 'custom' 
+            ? parseInt(parsedData.customDays || '7') 
+            : parseInt(parsedData.detoxDuration);
+        }
+        
+        setCompletionRate(Math.min(100, Math.round((dayDiff / totalDays) * 100)));
+      }
+    }
+    
+    // Set example goals
+    setDailyGoals([
+      { day: 1, goal: "No social media for 2 hours", completed: true },
+      { day: 2, goal: "Meditate for 10 minutes", completed: true },
+      { day: 3, goal: "Replace social media with reading", completed: false },
+      { day: 4, goal: "Journal about your feelings", completed: false },
+      { day: 5, goal: "30 minute outdoor walk", completed: false },
+      { day: 6, goal: "Call a friend instead of texting", completed: false },
+      { day: 7, goal: "Full day without social media", completed: false },
+    ]);
+  }, []);
+
+  const toggleGoalCompletion = (index: number) => {
+    setDailyGoals(prev => {
+      const updated = [...prev];
+      updated[index] = {
+        ...updated[index],
+        completed: !updated[index].completed
+      };
+      return updated;
+    });
+  };
+
+  const goToDay = (direction: 'prev' | 'next') => {
+    if (direction === 'prev' && detoxDay > 1) {
+      setDetoxDay(prev => prev - 1);
+    } else if (direction === 'next' && detoxDay < dailyGoals.length) {
+      setDetoxDay(prev => prev + 1);
+    }
+  };
+
+  // Calculate completed goals percentage
+  const completedGoals = dailyGoals.filter(goal => goal.completed).length;
+  const goalCompletionPercentage = Math.round((completedGoals / dailyGoals.length) * 100);
+
+  const currentDayGoal = dailyGoals.find(goal => goal.day === detoxDay) || dailyGoals[0];
 
   return (
-    <div className="container mx-auto py-8 animate-fade-in">
-      <div className="text-center mb-10">
-        <h2 className="text-3xl font-bold text-mindcleanse-700 flex items-center justify-center">
-          <LineChart className="mr-2 text-mindcleanse-500" size={28} />
-          Your Progress
-        </h2>
-        <p className="text-muted-foreground max-w-2xl mx-auto">
-          Track your digital detox journey and celebrate your achievements
-        </p>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
-        <Card className="card-hover">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center text-mindcleanse-600">
-              <Calendar size={18} className="mr-2" />
-              CURRENT STREAK
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-baseline">
-              <span className="text-5xl font-bold text-mindcleanse-700">{currentStreak}</span>
-              <span className="text-xl ml-2 text-muted-foreground">days</span>
-            </div>
-            <p className="text-muted-foreground text-sm mt-2">Keep going! Your longest streak was 7 days.</p>
-          </CardContent>
-        </Card>
-        
-        <Card className="card-hover">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center text-mindcleanse-600">
-              <Clock size={18} className="mr-2" />
-              MINDFUL MINUTES
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-baseline">
-              <span className="text-5xl font-bold text-mindcleanse-700">180</span>
-              <span className="text-xl ml-2 text-muted-foreground">total</span>
-            </div>
-            <p className="text-muted-foreground text-sm mt-2">That's 3 hours of mindfulness practice!</p>
-          </CardContent>
-        </Card>
-        
-        <Card className="card-hover">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center text-mindcleanse-600">
-              <Award size={18} className="mr-2" />
-              ACHIEVEMENTS
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-baseline">
-              <span className="text-5xl font-bold text-mindcleanse-700">3</span>
-              <span className="text-xl ml-2 text-muted-foreground">of 5</span>
-            </div>
-            <p className="text-muted-foreground text-sm mt-2">You've unlocked 3 out of 5 achievements!</p>
-          </CardContent>
-        </Card>
-      </div>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
-        <Card className="card-hover lg:col-span-2">
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
           <CardHeader>
-            <CardTitle className="flex items-center">
-              Weekly Mindfulness Minutes
-            </CardTitle>
+            <CardTitle>Detox Progress</CardTitle>
+            <CardDescription>Day {detoxDay} of your journey</CardDescription>
           </CardHeader>
-          <CardContent className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={weeklyData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="minutes" fill="#4AA69B" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between text-sm">
+                <span>Start</span>
+                <span>{completionRate}% Complete</span>
+              </div>
+              <Progress value={completionRate} className="h-2" />
+              
+              {completionRate >= 100 && (
+                <div className="flex items-center justify-center mt-6 text-center space-y-2">
+                  <Trophy className="h-8 w-8 text-yellow-500 mr-2" />
+                  <div>
+                    <p className="font-semibold">Congratulations!</p>
+                    <p className="text-sm text-gray-500">You've completed your detox goal</p>
+                  </div>
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
         
-        <Card className="card-hover">
+        <Card>
           <CardHeader>
-            <CardTitle className="flex items-center">
-              21-Day Challenge
-            </CardTitle>
+            <CardTitle>Goals Completed</CardTitle>
+            <CardDescription>Your mindfulness achievements</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="mb-6">
-              <div className="flex justify-between mb-1">
-                <span className="text-sm text-muted-foreground">{daysCompleted} days completed</span>
-                <span className="text-sm text-muted-foreground">{totalDays} days total</span>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between text-sm">
+                <span>{completedGoals} of {dailyGoals.length} goals completed</span>
+                <span>{goalCompletionPercentage}%</span>
               </div>
-              <Progress value={percentComplete} className="h-2 bg-mindcleanse-100" indicatorClassName="bg-mindcleanse-500" />
-            </div>
-            
-            <div>
-              <h4 className="font-medium mb-3">Achievements</h4>
-              <ul className="space-y-2">
-                {achievements.map((achievement, index) => (
-                  <li key={index} className="flex items-center">
-                    {achievement.completed ? (
-                      <div className="w-5 h-5 rounded-full bg-mindcleanse-500 flex items-center justify-center mr-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
-                          <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                      </div>
-                    ) : (
-                      <div className="w-5 h-5 rounded-full border border-mindcleanse-200 mr-2"></div>
-                    )}
-                    <span className={achievement.completed ? 'text-mindcleanse-700' : 'text-muted-foreground'}>
-                      {achievement.name}
-                    </span>
-                  </li>
-                ))}
-              </ul>
+              <Progress value={goalCompletionPercentage} className="h-2" />
+              
+              {completedGoals > 0 && (
+                <div className="flex items-center mt-4">
+                  <Award className="h-5 w-5 text-primary mr-2" />
+                  <span className="text-sm">Keep up the good work!</span>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
       </div>
       
-      <Card className="card-hover bg-mindcleanse-50">
-        <CardContent className="p-6">
-          <div className="text-center">
-            <h3 className="text-xl font-medium mb-2">Your Digital Wellness Score</h3>
-            <div className="flex justify-center items-center mb-4">
-              <div className="w-24 h-24 rounded-full bg-white border-4 border-mindcleanse-300 flex items-center justify-center">
-                <span className="text-3xl font-bold text-mindcleanse-600">76</span>
-              </div>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>Day {detoxDay}</CardTitle>
+            <CardDescription>Today's mindfulness goal</CardDescription>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Button 
+              variant="outline" 
+              size="icon" 
+              onClick={() => goToDay('prev')} 
+              disabled={detoxDay <= 1}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <Button 
+              variant="outline" 
+              size="icon" 
+              onClick={() => goToDay('next')} 
+              disabled={detoxDay >= dailyGoals.length}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {currentDayGoal && (
+            <div 
+              className={`p-4 rounded-lg border ${currentDayGoal.completed ? 'bg-green-50 border-green-100' : 'bg-gray-50 border-gray-100'} 
+              flex items-center justify-between`}
+            >
+              <span className="font-medium">{currentDayGoal.goal}</span>
+              <Button 
+                variant={currentDayGoal.completed ? "default" : "outline"}
+                size="sm" 
+                onClick={() => toggleGoalCompletion(currentDayGoal.day - 1)}
+                className={currentDayGoal.completed ? "bg-green-600 hover:bg-green-700" : ""}
+              >
+                {currentDayGoal.completed ? (
+                  <>
+                    <CheckCircle className="h-4 w-4 mr-1" /> Completed
+                  </>
+                ) : (
+                  "Mark Complete"
+                )}
+              </Button>
             </div>
-            <p className="max-w-lg mx-auto text-muted-foreground">
-              Your digital wellness score is calculated based on your mindfulness minutes, journal entries, 
-              and streak consistency. Keep up the good work to improve your score!
-            </p>
+          )}
+          
+          <div className="mt-6">
+            <h4 className="font-medium mb-2">Your Progress</h4>
+            <div className="space-y-3">
+              {dailyGoals.map((goal, index) => (
+                <div key={index} className="flex items-center text-sm">
+                  <div 
+                    className={`w-5 h-5 rounded-full flex items-center justify-center mr-3 
+                    ${goal.completed ? 'bg-green-500 text-white' : 'border border-gray-300'}`}
+                  >
+                    {goal.completed && <CheckCircle className="h-3 w-3" />}
+                  </div>
+                  <span className={`${goal.completed ? 'line-through text-gray-500' : ''}`}>
+                    Day {goal.day}: {goal.goal}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
         </CardContent>
       </Card>
