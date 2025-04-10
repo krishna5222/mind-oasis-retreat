@@ -1,39 +1,88 @@
 
-import React, { useState } from 'react';
-import { BookOpen, Save, Plus, Calendar, ThumbsUp, ThumbsDown } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { BookOpen, Save, Plus, Calendar, ThumbsUp, ThumbsDown, RefreshCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
+import { 
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+
+interface JournalEntry {
+  date: string;
+  content: string;
+  mood: 'good' | 'bad' | null;
+  prompt: string;
+}
+
+const JOURNAL_PROMPTS = [
+  "What did you do instead of scrolling today?",
+  "What emotions came up today?",
+  "What's one win from today?",
+  "Did you notice any urges to use social media? How did you handle them?",
+  "What did you learn about yourself today without digital distractions?",
+  "How has your focus changed since starting your digital detox?",
+  "What are you grateful for today?",
+  "What real-life connections did you nurture today?"
+];
 
 const Journal: React.FC = () => {
   const { toast } = useToast();
   const [journalEntry, setJournalEntry] = useState('');
   const [mood, setMood] = useState<'good' | 'bad' | null>(null);
-
-  // Mock past entries
-  const pastEntries = [
-    { 
-      date: 'April 8, 2025', 
-      content: 'I managed to avoid Instagram completely today. I found myself reaching for my phone several times but caught myself and practiced breathing instead.',
-      mood: 'good' 
-    },
-    { 
-      date: 'April 7, 2025', 
-      content: 'Today was challenging. I felt disconnected not checking social media, but I did enjoy the extra time I had to read.',
-      mood: 'bad' 
-    },
-  ];
+  const [currentPrompt, setCurrentPrompt] = useState('');
+  const [pastEntries, setPastEntries] = useState<JournalEntry[]>([]);
+  
+  // Initialize with a random prompt and load saved entries
+  useEffect(() => {
+    getRandomPrompt();
+    const savedEntries = localStorage.getItem('mindCleanseJournal');
+    if (savedEntries) {
+      setPastEntries(JSON.parse(savedEntries));
+    }
+  }, []);
+  
+  const getRandomPrompt = () => {
+    const randomIndex = Math.floor(Math.random() * JOURNAL_PROMPTS.length);
+    setCurrentPrompt(JOURNAL_PROMPTS[randomIndex]);
+  };
 
   const handleSaveEntry = () => {
     if (journalEntry.trim()) {
+      const today = new Date();
+      const formattedDate = today.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+      
+      const newEntry: JournalEntry = {
+        date: formattedDate,
+        content: journalEntry,
+        mood: mood,
+        prompt: currentPrompt
+      };
+      
+      const updatedEntries = [newEntry, ...pastEntries];
+      setPastEntries(updatedEntries);
+      
+      // Save to localStorage
+      localStorage.setItem('mindCleanseJournal', JSON.stringify(updatedEntries));
+      
       toast({
         title: "Journal entry saved",
         description: "Your reflection has been recorded.",
         duration: 3000,
       });
+      
       setJournalEntry('');
       setMood(null);
+      getRandomPrompt();
     } else {
       toast({
         title: "Cannot save empty entry",
@@ -63,14 +112,29 @@ const Journal: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-2 card-hover">
           <CardHeader>
-            <CardTitle className="flex items-center">
-              <Plus className="mr-2 text-mindcleanse-500" size={20} />
-              Today's Reflection
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center">
+                <Plus className="mr-2 text-mindcleanse-500" size={20} />
+                Today's Reflection
+              </div>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={getRandomPrompt} 
+                className="text-mindcleanse-500"
+              >
+                <RefreshCcw size={16} className="mr-1" />
+                New Prompt
+              </Button>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="mb-4">
-              <p className="mb-2 text-sm text-muted-foreground">How did your digital detox go today?</p>
+              <div className="bg-mindcleanse-50 p-4 rounded-md mb-4 border border-mindcleanse-200">
+                <p className="font-medium text-mindcleanse-700">{currentPrompt}</p>
+              </div>
+              
+              <p className="mb-2 text-sm text-muted-foreground">Your response:</p>
               <Textarea
                 placeholder="Write your thoughts here..."
                 className="min-h-[200px] mb-4"
@@ -125,22 +189,43 @@ const Journal: React.FC = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {pastEntries.map((entry, index) => (
-              <div key={index} className="mb-6 pb-6 border-b last:border-b-0 last:pb-0 last:mb-0">
-                <div className="flex justify-between mb-2">
-                  <h4 className="font-medium">{entry.date}</h4>
-                  {entry.mood === 'good' ? (
-                    <ThumbsUp size={16} className="text-green-500" />
-                  ) : (
-                    <ThumbsDown size={16} className="text-red-500" />
-                  )}
+            {pastEntries.length > 0 ? (
+              <Carousel className="w-full">
+                <CarouselContent>
+                  {pastEntries.map((entry, index) => (
+                    <CarouselItem key={index}>
+                      <div className="p-1">
+                        <Card>
+                          <CardContent className="p-4">
+                            <div className="flex justify-between mb-2">
+                              <h4 className="font-medium">{entry.date}</h4>
+                              {entry.mood === 'good' ? (
+                                <ThumbsUp size={16} className="text-green-500" />
+                              ) : entry.mood === 'bad' ? (
+                                <ThumbsDown size={16} className="text-red-500" />
+                              ) : null}
+                            </div>
+                            <div className="bg-gray-50 p-2 rounded text-xs text-gray-500 italic mb-2">
+                              "{entry.prompt}"
+                            </div>
+                            <p className="text-sm text-muted-foreground">{entry.content}</p>
+                          </CardContent>
+                        </Card>
+                      </div>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <div className="flex justify-center mt-2">
+                  <CarouselPrevious className="relative mr-2 inset-0 translate-y-0" />
+                  <CarouselNext className="relative ml-2 inset-0 translate-y-0" />
                 </div>
-                <p className="text-sm text-muted-foreground">{entry.content}</p>
+              </Carousel>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>No entries yet.</p>
+                <p className="text-sm">Your journal entries will appear here.</p>
               </div>
-            ))}
-            <Button variant="outline" className="w-full mt-4 border-lavender-300 text-lavender-500 hover:bg-lavender-100">
-              View All Entries
-            </Button>
+            )}
           </CardContent>
         </Card>
       </div>
