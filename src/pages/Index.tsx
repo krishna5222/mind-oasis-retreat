@@ -7,6 +7,7 @@ import MindfulnessTimer from '@/components/MindfulnessTimer';
 import Journal from '@/components/Journal';
 import ProgressTracker from '@/components/ProgressTracker';
 import DailyCheckIn from '@/components/DailyCheckIn';
+import CravingHelp from '@/components/CravingHelp';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const Index = () => {
@@ -55,6 +56,9 @@ const Index = () => {
         </Tabs>
       </main>
       <Footer />
+
+      {/* Craving Help button - always visible */}
+      <CravingHelp />
     </div>
   );
 };
