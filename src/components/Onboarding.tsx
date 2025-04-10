@@ -348,46 +348,48 @@ const Onboarding = () => {
         {renderProgressBar()}
         
         <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8 flex-grow flex flex-col">
-          <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col flex-grow">
-            <div className="flex-grow">
-              {renderStepContent()}
-            </div>
-            
-            <div className="flex justify-between mt-8 pt-4 border-t border-gray-100">
-              {step > 1 ? (
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={goToPreviousStep}
-                  className="flex items-center"
-                >
-                  <ChevronLeft className="w-4 h-4 mr-2" />
-                  Back
-                </Button>
-              ) : (
-                <div></div>
-              )}
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col flex-grow">
+              <div className="flex-grow">
+                {renderStepContent()}
+              </div>
               
-              {step < totalSteps ? (
-                <Button 
-                  type="button"
-                  onClick={goToNextStep}
-                  className="flex items-center bg-mindcleanse-500 hover:bg-mindcleanse-600"
-                >
-                  Next
-                  <ChevronRight className="w-4 h-4 ml-2" />
-                </Button>
-              ) : (
-                <Button 
-                  type="submit"
-                  className="flex items-center bg-mindcleanse-500 hover:bg-mindcleanse-600"
-                >
-                  Complete
-                  <CheckCircle className="w-4 h-4 ml-2" />
-                </Button>
-              )}
-            </div>
-          </form>
+              <div className="flex justify-between mt-8 pt-4 border-t border-gray-100">
+                {step > 1 ? (
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={goToPreviousStep}
+                    className="flex items-center"
+                  >
+                    <ChevronLeft className="w-4 h-4 mr-2" />
+                    Back
+                  </Button>
+                ) : (
+                  <div></div>
+                )}
+                
+                {step < totalSteps ? (
+                  <Button 
+                    type="button"
+                    onClick={goToNextStep}
+                    className="flex items-center bg-mindcleanse-500 hover:bg-mindcleanse-600"
+                  >
+                    Next
+                    <ChevronRight className="w-4 h-4 ml-2" />
+                  </Button>
+                ) : (
+                  <Button 
+                    type="submit"
+                    className="flex items-center bg-mindcleanse-500 hover:bg-mindcleanse-600"
+                  >
+                    Complete
+                    <CheckCircle className="w-4 h-4 ml-2" />
+                  </Button>
+                )}
+              </div>
+            </form>
+          </Form>
         </div>
       </div>
     </div>
