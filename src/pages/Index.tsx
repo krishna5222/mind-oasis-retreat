@@ -6,6 +6,7 @@ import Dashboard from '@/components/Dashboard';
 import MindfulnessTimer from '@/components/MindfulnessTimer';
 import Journal from '@/components/Journal';
 import ProgressTracker from '@/components/ProgressTracker';
+import DailyCheckIn from '@/components/DailyCheckIn';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const Index = () => {
@@ -21,6 +22,9 @@ const Index = () => {
               <TabsTrigger value="dashboard" className="data-[state=active]:bg-mindcleanse-500 data-[state=active]:text-white">
                 Dashboard
               </TabsTrigger>
+              <TabsTrigger value="check-in" className="data-[state=active]:bg-mindcleanse-500 data-[state=active]:text-white">
+                Check-in
+              </TabsTrigger>
               <TabsTrigger value="timer" className="data-[state=active]:bg-mindcleanse-500 data-[state=active]:text-white">
                 Mindfulness
               </TabsTrigger>
@@ -35,6 +39,9 @@ const Index = () => {
           
           <TabsContent value="dashboard">
             <Dashboard />
+          </TabsContent>
+          <TabsContent value="check-in">
+            <DailyCheckIn />
           </TabsContent>
           <TabsContent value="timer">
             <MindfulnessTimer />
