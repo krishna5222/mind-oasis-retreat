@@ -9,6 +9,7 @@ import ProgressTracker from '@/components/ProgressTracker';
 import DailyCheckIn from '@/components/DailyCheckIn';
 import CravingHelp from '@/components/CravingHelp';
 import UsageStats from '@/components/UsageStats';
+import AppBlocker from '@/components/AppBlocker';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const Index = () => {
@@ -39,6 +40,9 @@ const Index = () => {
               <TabsTrigger value="usage" className="data-[state=active]:bg-mindcleanse-500 data-[state=active]:text-white">
                 Usage Stats
               </TabsTrigger>
+              <TabsTrigger value="blocker" className="data-[state=active]:bg-mindcleanse-500 data-[state=active]:text-white">
+                App Blocker
+              </TabsTrigger>
             </TabsList>
           </div>
           
@@ -59,6 +63,9 @@ const Index = () => {
           </TabsContent>
           <TabsContent value="usage">
             <UsageStats />
+          </TabsContent>
+          <TabsContent value="blocker">
+            <AppBlocker />
           </TabsContent>
         </Tabs>
       </main>
