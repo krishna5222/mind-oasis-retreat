@@ -8,6 +8,7 @@ import Journal from '@/components/Journal';
 import ProgressTracker from '@/components/ProgressTracker';
 import DailyCheckIn from '@/components/DailyCheckIn';
 import CravingHelp from '@/components/CravingHelp';
+import UsageStats from '@/components/UsageStats';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const Index = () => {
@@ -35,6 +36,9 @@ const Index = () => {
               <TabsTrigger value="progress" className="data-[state=active]:bg-mindcleanse-500 data-[state=active]:text-white">
                 Progress
               </TabsTrigger>
+              <TabsTrigger value="usage" className="data-[state=active]:bg-mindcleanse-500 data-[state=active]:text-white">
+                Usage Stats
+              </TabsTrigger>
             </TabsList>
           </div>
           
@@ -52,6 +56,9 @@ const Index = () => {
           </TabsContent>
           <TabsContent value="progress">
             <ProgressTracker />
+          </TabsContent>
+          <TabsContent value="usage">
+            <UsageStats />
           </TabsContent>
         </Tabs>
       </main>
