@@ -10,6 +10,7 @@ import DailyCheckIn from '@/components/DailyCheckIn';
 import CravingHelp from '@/components/CravingHelp';
 import UsageStats from '@/components/UsageStats';
 import AppBlocker from '@/components/AppBlocker';
+import DetoxCountdown from '@/components/DetoxCountdown';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const Index = () => {
@@ -19,6 +20,11 @@ const Index = () => {
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar />
       <main className="flex-grow container-padding">
+        {/* Always display the countdown timer at the top */}
+        <div className="mb-6">
+          <DetoxCountdown />
+        </div>
+        
         <Tabs defaultValue="dashboard" value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="flex justify-center mb-6">
             <TabsList className="bg-white shadow-sm">
