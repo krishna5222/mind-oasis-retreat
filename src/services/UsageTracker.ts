@@ -1,3 +1,4 @@
+
 // A service to track app usage in real-time
 
 interface AppUsageData {
@@ -230,8 +231,7 @@ class UsageTracker {
     // Use the toast system for now
     // In a real app, this would connect to system notifications
     import('sonner').then(({ toast }) => {
-      toast({
-        title,
+      toast.success(message, {
         description: message
       });
     });
