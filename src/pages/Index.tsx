@@ -11,6 +11,8 @@ import CravingHelp from '@/components/CravingHelp';
 import UsageStats from '@/components/UsageStats';
 import AppBlocker from '@/components/AppBlocker';
 import DetoxCountdown from '@/components/DetoxCountdown';
+import TimeSettings from '@/components/TimeSettings';
+import UsageReport from '@/components/UsageReport';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const Index = () => {
@@ -26,7 +28,7 @@ const Index = () => {
         </div>
         
         <Tabs defaultValue="dashboard" value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <div className="flex justify-center mb-6">
+          <div className="flex justify-center mb-6 overflow-x-auto scrollbar-hide">
             <TabsList className="bg-white shadow-sm">
               <TabsTrigger value="dashboard" className="data-[state=active]:bg-mindcleanse-500 data-[state=active]:text-white">
                 Dashboard
@@ -43,11 +45,17 @@ const Index = () => {
               <TabsTrigger value="progress" className="data-[state=active]:bg-mindcleanse-500 data-[state=active]:text-white">
                 Progress
               </TabsTrigger>
-              <TabsTrigger value="usage" className="data-[state=active]:bg-mindcleanse-500 data-[state=active]:text-white">
+              <TabsTrigger value="usage-stats" className="data-[state=active]:bg-mindcleanse-500 data-[state=active]:text-white">
                 Usage Stats
+              </TabsTrigger>
+              <TabsTrigger value="usage-report" className="data-[state=active]:bg-mindcleanse-500 data-[state=active]:text-white">
+                Usage Report
               </TabsTrigger>
               <TabsTrigger value="blocker" className="data-[state=active]:bg-mindcleanse-500 data-[state=active]:text-white">
                 App Blocker
+              </TabsTrigger>
+              <TabsTrigger value="time-limits" className="data-[state=active]:bg-mindcleanse-500 data-[state=active]:text-white">
+                Time Limits
               </TabsTrigger>
             </TabsList>
           </div>
@@ -67,11 +75,17 @@ const Index = () => {
           <TabsContent value="progress">
             <ProgressTracker />
           </TabsContent>
-          <TabsContent value="usage">
+          <TabsContent value="usage-stats">
             <UsageStats />
+          </TabsContent>
+          <TabsContent value="usage-report">
+            <UsageReport />
           </TabsContent>
           <TabsContent value="blocker">
             <AppBlocker />
+          </TabsContent>
+          <TabsContent value="time-limits">
+            <TimeSettings />
           </TabsContent>
         </Tabs>
       </main>

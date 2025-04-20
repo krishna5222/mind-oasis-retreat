@@ -23,6 +23,47 @@ const App = () => {
     } else {
       setOnboardingCompleted(false);
     }
+    
+    // Initialize the usage tracker
+    if (typeof window !== 'undefined') {
+      import('@/services/UsageTracker').then(() => {
+        console.log('Usage tracker initialized');
+      });
+    }
+    
+    // Set up daily notification
+    const checkAndSendDailyNotification = () => {
+      const lastNotification = localStorage.getItem('lastDailyNotification');
+      const today = new Date().toDateString();
+      
+      if (lastNotification !== today) {
+        // Import dynamically to avoid issues during initialization
+        import('@/services/UsageTracker').then(({ default: UsageTracker }) => {
+          // Get today's saved minutes
+          const savedMinutes = UsageTracker.getDailyUsage(new Date().toISOString().split('T')[0])?.savedMinutes || 0;
+          
+          setTimeout(() => {
+            import('sonner').then(({ toast }) => {
+              toast({
+                title: "Daily Reminder",
+                description: `Stay strong! You've saved ${savedMinutes} minutes today.`,
+                duration: 5000,
+              });
+            });
+          }, 5000); // Show after 5 seconds
+          
+          // Mark notification as shown today
+          localStorage.setItem('lastDailyNotification', today);
+        });
+      }
+    };
+    
+    checkAndSendDailyNotification();
+    
+    // Schedule notification check every hour
+    const intervalId = setInterval(checkAndSendDailyNotification, 3600000);
+    
+    return () => clearInterval(intervalId);
   }, []);
 
   // Show loading state while checking onboarding status

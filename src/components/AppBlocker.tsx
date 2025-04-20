@@ -18,12 +18,14 @@ import {
   AlertDialogTitle,
   AlertDialogAction
 } from '@/components/ui/alert-dialog';
+import UsageTracker from '@/services/UsageTracker';
 
 interface App {
   id: string;
   name: string;
   iconUrl: string;
   blocked: boolean;
+  dailyLimit?: number | null;
 }
 
 interface BlockedAppState {
@@ -51,18 +53,36 @@ const AppBlocker = () => {
   const [enteredPin, setEnteredPin] = useState('');
   const [showAppAlert, setShowAppAlert] = useState(false);
   const [attemptedApp, setAttemptedApp] = useState<App | null>(null);
+  const [limitBlockReason, setLimitBlockReason] = useState(false);
   
   // Load saved state on component mount
   useEffect(() => {
     const savedState = localStorage.getItem('appBlockerState');
     if (savedState) {
       const { blockedApps, pin, blockingActive } = JSON.parse(savedState) as BlockedAppState;
+      
+      // Update apps with saved state
       setApps(apps => apps.map(app => ({
         ...app,
         blocked: blockedApps.some(blockedApp => blockedApp.id === app.id)
       })));
       setPin(pin);
       setBlockingActive(blockingActive);
+    }
+    
+    // Load time limits
+    const savedLimits = localStorage.getItem('mindCleanseAppLimits');
+    if (savedLimits) {
+      const limits = JSON.parse(savedLimits);
+      
+      // Update apps with limit information
+      setApps(prevApps => prevApps.map(app => {
+        const limitInfo = limits.find((limit: any) => limit.appName === app.name);
+        return {
+          ...app,
+          dailyLimit: limitInfo ? limitInfo.dailyLimit : null
+        };
+      }));
     }
   }, []);
   
@@ -128,6 +148,13 @@ const AppBlocker = () => {
   };
   
   const simulateAppAttempt = (app: App) => {
+    // Check if app is blocked due to time limit
+    if (UsageTracker.shouldBlockApp(app.name)) {
+      setLimitBlockReason(true);
+    } else {
+      setLimitBlockReason(false);
+    }
+    
     setAttemptedApp(app);
     setShowAppAlert(true);
   };
@@ -141,6 +168,7 @@ const AppBlocker = () => {
     setShowDemoDialog(true);
     setTimerRemaining(600);
     setEnteredPin('');
+    setLimitBlockReason(false);
   };
   
   const startTimer = () => {
@@ -161,6 +189,16 @@ const AppBlocker = () => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+  
+  // Check if app has reached its daily limit
+  const hasReachedDailyLimit = (appName: string): boolean => {
+    return UsageTracker.shouldBlockApp(appName);
+  };
+  
+  // Get percentage of daily limit used
+  const getUsagePercentage = (appName: string): number => {
+    return UsageTracker.getUsagePercentage(appName);
   };
   
   return (
@@ -217,7 +255,16 @@ const AppBlocker = () => {
                   <Label htmlFor={`app-${app.id}`} className="flex items-center gap-2 cursor-pointer">
                     <span className="text-xl">{app.iconUrl}</span>
                     {app.name}
+                    {app.dailyLimit && (
+                      <span className="text-xs text-gray-500 ml-1">(Limit: {app.dailyLimit} min/day)</span>
+                    )}
                   </Label>
+                  
+                  {blockingActive && app.blocked && hasReachedDailyLimit(app.name) && (
+                    <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full ml-auto">
+                      Limit reached
+                    </span>
+                  )}
                 </div>
               ))}
             </div>
@@ -284,10 +331,14 @@ const AppBlocker = () => {
           </AlertDialogHeader>
           <div className="py-4 px-2 bg-red-50 border border-red-100 rounded-lg text-center">
             <p className="text-lg font-medium text-red-700 mb-2">
-              This app is blocked during your detox
+              {limitBlockReason 
+                ? 'You've reached your daily time limit for this app'
+                : 'This app is blocked during your detox'}
             </p>
             <p className="text-sm text-gray-600">
-              Remember why you started this journey. You're making great progress!
+              {limitBlockReason 
+                ? 'Come back tomorrow or adjust your time limits in settings.'
+                : 'Remember why you started this journey. You're making great progress!'}
             </p>
           </div>
           <AlertDialogFooter className="flex-col space-y-2">
