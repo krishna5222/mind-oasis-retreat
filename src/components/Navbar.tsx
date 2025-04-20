@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
@@ -34,10 +33,7 @@ const Navbar: React.FC = () => {
           
           {/* Desktop menu */}
           <div className="hidden md:flex md:items-center md:space-x-4">
-            <Link to="/" className="text-mindcleanse-600 hover:text-mindcleanse-800 px-3 py-2 rounded-md text-sm font-medium">Home</Link>
-            <Button variant="ghost" className="text-mindcleanse-600 hover:text-mindcleanse-800" onClick={handleNotImplemented}>Settings</Button>
-            <Button variant="ghost" className="text-mindcleanse-600 hover:text-mindcleanse-800" onClick={handleNotImplemented}>Profile</Button>
-            <Button className="bg-mindcleanse-500 hover:bg-mindcleanse-600 text-white" onClick={handleNotImplemented}>Get Started</Button>
+            
           </div>
           
           {/* Mobile menu button */}
@@ -57,33 +53,7 @@ const Navbar: React.FC = () => {
       {isMenuOpen && (
         <div className="md:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white">
-            <Link 
-              to="/" 
-              className="block text-mindcleanse-600 hover:text-mindcleanse-800 px-3 py-2 rounded-md text-base font-medium"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Home
-            </Link>
-            <Button 
-              variant="ghost" 
-              className="w-full text-left text-mindcleanse-600 hover:text-mindcleanse-800" 
-              onClick={handleNotImplemented}
-            >
-              Settings
-            </Button>
-            <Button 
-              variant="ghost" 
-              className="w-full text-left text-mindcleanse-600 hover:text-mindcleanse-800" 
-              onClick={handleNotImplemented}
-            >
-              Profile
-            </Button>
-            <Button 
-              className="w-full bg-mindcleanse-500 hover:bg-mindcleanse-600 text-white" 
-              onClick={handleNotImplemented}
-            >
-              Get Started
-            </Button>
+            
           </div>
         </div>
       )}
