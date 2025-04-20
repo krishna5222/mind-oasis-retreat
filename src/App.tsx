@@ -44,9 +44,7 @@ const App = () => {
           
           setTimeout(() => {
             import('sonner').then(({ toast }) => {
-              toast.success({
-                title: "Daily Reminder",
-                description: `Stay strong! You've saved ${savedMinutes} minutes today.`,
+              toast.success(`Stay strong! You've saved ${savedMinutes} minutes today.`, {
                 duration: 5000,
               });
             });
