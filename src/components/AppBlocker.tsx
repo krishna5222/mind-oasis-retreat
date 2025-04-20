@@ -332,13 +332,13 @@ const AppBlocker = () => {
           <div className="py-4 px-2 bg-red-50 border border-red-100 rounded-lg text-center">
             <p className="text-lg font-medium text-red-700 mb-2">
               {limitBlockReason 
-                ? 'You've reached your daily time limit for this app'
-                : 'This app is blocked during your detox'}
+                ? "You've reached your daily time limit for this app"
+                : "This app is blocked during your detox"}
             </p>
             <p className="text-sm text-gray-600">
               {limitBlockReason 
-                ? 'Come back tomorrow or adjust your time limits in settings.'
-                : 'Remember why you started this journey. You're making great progress!'}
+                ? "Come back tomorrow or adjust your time limits in settings."
+                : "Remember why you started this journey. You're making great progress!"}
             </p>
           </div>
           <AlertDialogFooter className="flex-col space-y-2">
