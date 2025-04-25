@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from "@/hooks/use-toast";
@@ -6,7 +5,7 @@ import { differenceInDays, differenceInHours, differenceInMinutes, differenceInS
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { Trophy, Clock, CalendarCheck, TrendingUp, RefreshCcw, Settings } from 'lucide-react';
+import { Trophy, Clock, CalendarCheck, TrendingUp, RefreshCcw } from 'lucide-react';
 
 const DetoxCountdown = () => {
   const [timeRemaining, setTimeRemaining] = useState({
@@ -26,7 +25,6 @@ const DetoxCountdown = () => {
   });
   const { toast } = useToast();
 
-  // Calculate time remaining in the detox period
   useEffect(() => {
     const onboardingData = localStorage.getItem('mindCleanseOnboarding');
     if (!onboardingData) return;
@@ -34,7 +32,6 @@ const DetoxCountdown = () => {
     const { startDate, detoxDuration, customDays } = JSON.parse(onboardingData);
     const start = new Date(startDate);
     
-    // Calculate end date based on duration
     const durationInDays = detoxDuration === 'custom' ? 
       parseInt(customDays, 10) : 
       parseInt(detoxDuration, 10);
@@ -43,7 +40,6 @@ const DetoxCountdown = () => {
     end.setDate(end.getDate() + durationInDays);
     setDetoxEnds(end);
     
-    // Update the countdown
     const updateCountdown = () => {
       const now = new Date();
       
@@ -64,31 +60,25 @@ const DetoxCountdown = () => {
       setTimeRemaining({ days, hours, minutes, seconds });
     };
     
-    // Initial update
     updateCountdown();
     
-    // Set up interval for countdown
     const interval = setInterval(updateCountdown, 1000);
     
     return () => clearInterval(interval);
   }, [isDetoxEnded]);
 
-  // Generate detox summary when detox ends
   const generateDetoxSummary = (startDate: Date, endDate: Date) => {
     const usageData = localStorage.getItem('mindCleanseUsageStats');
     if (!usageData) return;
     
     const { sessions } = JSON.parse(usageData);
     
-    // Calculate total hours saved
     const avoidedSessions = sessions.filter((session: any) => session.avoidedUsage === true);
     const totalMinutesSaved = avoidedSessions.reduce((total: number, session: any) => 
       total + session.duration, 0);
     
-    // Find days completed
     const daysCompleted = differenceInDays(endDate, startDate);
     
-    // Find most improved day
     const dayStats: {[key: string]: number} = {};
     avoidedSessions.forEach((session: any) => {
       if (!dayStats[session.date]) {
@@ -108,13 +98,12 @@ const DetoxCountdown = () => {
     });
     
     setDetoxSummary({
-      totalHoursSaved: Math.round((totalMinutesSaved / 60) * 10) / 10, // Round to 1 decimal place
+      totalHoursSaved: Math.round((totalMinutesSaved / 60) * 10) / 10,
       daysCompleted,
       mostImprovedDay: mostImprovedDay ? format(new Date(mostImprovedDay), 'MMM d, yyyy') : 'N/A',
       mostImprovedMinutes
     });
     
-    // Show toast notification
     toast({
       title: "Detox Completed!",
       description: "Congratulations! Your digital detox is complete. Check your summary.",
@@ -122,41 +111,29 @@ const DetoxCountdown = () => {
     });
   };
 
-  // Restart detox with same settings
   const handleRestartDetox = () => {
     const onboardingData = localStorage.getItem('mindCleanseOnboarding');
     if (!onboardingData) return;
     
     const data = JSON.parse(onboardingData);
     
-    // Update start date to today
     data.startDate = new Date().toISOString();
     data.onboardingCompleted = true;
     
     localStorage.setItem('mindCleanseOnboarding', JSON.stringify(data));
     
-    // Reset detox ended state
     setIsDetoxEnded(false);
     
-    // Show confirmation toast
     toast({
       title: "Detox Restarted",
       description: "Your digital detox has been restarted. Good luck!",
       duration: 5000,
     });
     
-    // Reload the page to refresh all components
     window.location.reload();
   };
 
-  // Redirect to onboarding to adjust settings
-  const handleAdjustSettings = () => {
-    window.location.href = '/onboarding';
-  };
-
-  // Get saved time data and show reminder notifications
   useEffect(() => {
-    // Get the usage data to calculate time saved
     const getTimeSavedToday = () => {
       const usageData = localStorage.getItem('mindCleanseUsageStats');
       if (!usageData) return 0;
@@ -173,13 +150,11 @@ const DetoxCountdown = () => {
       return totalMinutes;
     };
 
-    // Check and update time saved once per minute
     const checkTimeSaved = () => {
       const savedMinutes = getTimeSavedToday();
       if (savedMinutes !== timeSaved) {
         setTimeSaved(savedMinutes);
         
-        // Only show notification if there's a meaningful update (more time saved)
         if (savedMinutes > timeSaved && timeSaved > 0) {
           toast({
             title: "Daily Reminder",
@@ -190,22 +165,19 @@ const DetoxCountdown = () => {
       }
     };
 
-    // Initial check
     checkTimeSaved();
     
-    // Set up interval for checking time saved (every minute)
     const interval = setInterval(checkTimeSaved, 60000);
     
     return () => clearInterval(interval);
   }, [timeSaved, toast]);
 
-  // Format the countdown for display
   const formatTimeUnit = (unit: number) => {
     return unit.toString().padStart(2, '0');
   };
 
   if (!detoxEnds) {
-    return null; // Don't render until we have the detox end date
+    return null;
   }
 
   return (
@@ -245,7 +217,6 @@ const DetoxCountdown = () => {
         </CardContent>
       </Card>
 
-      {/* Detox Completion Summary Dialog */}
       <AlertDialog open={isDetoxEnded} onOpenChange={setIsDetoxEnded}>
         <AlertDialogContent className="max-w-lg">
           <AlertDialogHeader>
@@ -292,14 +263,6 @@ const DetoxCountdown = () => {
           </div>
           
           <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-            <Button 
-              className="w-full sm:w-auto" 
-              variant="outline" 
-              onClick={handleAdjustSettings}
-            >
-              <Settings className="mr-2 h-4 w-4" />
-              Adjust Settings
-            </Button>
             <Button 
               className="w-full sm:w-auto bg-mindcleanse-600 hover:bg-mindcleanse-700" 
               onClick={handleRestartDetox}
